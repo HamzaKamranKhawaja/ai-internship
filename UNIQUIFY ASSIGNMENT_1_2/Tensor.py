@@ -168,7 +168,23 @@ class Tensor:
             out_array = [[sum([re * ce for re, ce in zip(row_A, col_B)]) for col_B in zip(*B)] for row_A in A]
             out_tensor = Tensor(out_array)
         # one or both are 2+ dimensional
-        #TODO: IMPLEMENT 2+ DIMENSIONAL DOT PRODUCT
+        #XW = X.W_[i, j, k, m] = sum(X_[i, j, :] * W_[k, :, m])
+        else:
+            rarray = []
+            if len(Ashape) > 2:
+               for i in range(Ashape[0]):
+                    intermediate_tensor = Tensor(A[i]).dot(tensorB)
+                    intermediate_array = intermediate_tensor.reshaped
+                    rarray.append(intermediate_array)
+
+            elif len(Bshape) > 2:
+                for j in range(Bshape[0]):
+                    intermediate_tensor = tensorA.dot(Tensor(B[j]))
+                    intermediate_array = intermediate_tensor.reshaped
+                    rarray.append(intermediate_array)
+
+            out_tensor = Tensor(rarray)
+
         return out_tensor
 
     @classmethod
@@ -182,5 +198,4 @@ class Tensor:
         c_data = [a + b for (a, b) in zip(A.data, B.data)]
         c = Tensor(c_data, A.shape)
         return c
-
 
