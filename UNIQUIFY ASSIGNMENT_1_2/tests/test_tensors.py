@@ -10,8 +10,6 @@ from Activations import *
 
 from keras import backend as K
 
-
-
 class TestTensor(unittest.TestCase):
 
     def test_shape_edgecases(self):
