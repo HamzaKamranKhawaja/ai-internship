@@ -133,9 +133,13 @@ class Tensor:
         # either A or B is 0 dimensional i.e scalar
         # we use data of tensor to multiply, then construct a new tensor
         if Ashape == [1] or Bshape == [1]:
+            #TODO: SHAPE MISMATCH SHOULD RAISE ERROR
+            if len(Bshape) > 1 and Ashape[-1] != Bshape[-2] or len(Ashape) > 1 and Ashape[-1] != Bshape[-1]:
+                raise ValueError(f"Shape {Ashape} is not compatible with {Bshape}")
             scalar = A[0] if Ashape == [1] else B[0]
             array = dataA if Bshape == [1] else dataB
             shape = Ashape if array == dataA else Bshape
+
             out_array = [scalar * val for val in array]
             out_tensor = Tensor(out_array, shape)
         # A and B are 1 D
@@ -169,22 +173,50 @@ class Tensor:
             out_tensor = Tensor(out_array)
         # one or both are 2+ dimensional
         #XW = X.W_[i, j, k, m] = sum(X_[i, j, :] * W_[k, :, m])
+        #TODO: FINISH IMPLEMENTATION OF THIS. CAN RECURSIVELY USE
         else:
-            rarray = []
-            if len(Ashape) > 2:
-               for i in range(Ashape[0]):
-                    intermediate_tensor = Tensor(A[i]).dot(tensorB)
-                    intermediate_array = intermediate_tensor.reshaped
-                    rarray.append(intermediate_array)
+            final_shape = list(Ashape[:-1])
+            final_shape.extend(list(Bshape[:-2]) + [Bshape[-1]])
+            zeros = Tensor([0], shape=final_shape)
+            zeros = zeros.reshaped
+            indices = [0] * len(final_shape)
+            print(final_shape)
+            maxi = math.prod(final_shape)
 
-            elif len(Bshape) > 2:
-                for j in range(Bshape[0]):
-                    intermediate_tensor = tensorA.dot(Tensor(B[j]))
-                    intermediate_array = intermediate_tensor.reshaped
-                    rarray.append(intermediate_array)
+            for i in range(maxi):
+                Acurr = A
+                Bcurr = B
+                curr_entry = zeros
+                for j in indices[:-1]:
+                    curr_entry = curr_entry[j]
+                for k in range(len(Ashape)-1):
+                    Acurr = Acurr[indices[k]]
+                for k in range(-len(Bshape), -2, -1):
+                    Bcurr = Bcurr[indices[k]]
 
-            out_tensor = Tensor(rarray)
+                Bcurr = list(zip(*Bcurr))
+                Bcurr = Bcurr[indices[-1]]
+                print(Bcurr)
+                print(Acurr)
+                curr_entry[indices[-1]] = sum([i * j for i, j in zip(Acurr, Bcurr)])
+                indices = increment(indices, final_shape)
 
+            out_tensor = Tensor(zeros)
+#            rarray = []
+#            if len(Ashape) > 2:
+#               for i in range(Ashape[0]):
+#                    intermediate_tensor = Tensor.dot(Tensor(A[i]), tensorB)
+#                    intermediate_array = intermediate_tensor.reshaped
+#                    rarray.append(intermediate_array)
+#
+#            elif len(Bshape) > 2:
+#                for j in range(Bshape[0]):
+#                    intermediate_tensor = Tensor.dot(tensorA, Tensor(B[j]))
+#                    intermediate_array = intermediate_tensor.reshaped
+#                    rarray.append(intermediate_array)
+#                    print(f" A {A} @ B {B[j]} with result shape {get_shape(rarray)}")
+#
+        #  print("In dot product", out_tensor.reshaped)
         return out_tensor
 
     @classmethod

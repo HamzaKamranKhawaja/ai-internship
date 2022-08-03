@@ -7,6 +7,7 @@ import numpy as np
 from Dense import Dense
 import tensorflow as tf
 from Activations import *
+import numpy.testing as tst
 
 from keras import backend as K
 
@@ -92,21 +93,76 @@ class TestTensor(unittest.TestCase):
 
     def test_Tensordot(self):
         print("Tensor dot testing...")
-        arrays1 = [[1, 1, 1, 1], [[1, 2], [3, 4]], [5], [[1, 1], [1, 1]]]
-        arrays2 = [[4, 4, 4, 4], [[1, 2], [3, 4]], [[2, 2], [2, 2]] , [[2], [2]]]
-        results = [[16],       [[7, 10], [15, 22]], [[10, 10], [10, 10]], [[4], [4]]]
+        print("Testing 1D cases...")
+        arrays1 = [[1, 1, 1, 1], [[1, 2], [3, 4]], [5, 2], [[1, 1], [1, 1]]]
+        arrays2 = [[4, 4, 4, 4], [[1, 2], [3, 4]], [[2, 2], [2, 2]], [[2], [2]]]
+
+
 
         #check first output of prod, which is the array. Second ignored output will be shape of that array
-        for arr1, arr2, r in zip(arrays1, arrays2, results):
+        for arr1, arr2 in zip(arrays1, arrays2):
+            print(f"arr1 : {arr1} @ arr2: {arr2}")
             A = Tensor(arr1)
             B = Tensor(arr2)
             C = Tensor.dot(A, B)
-            self.assertEqual(C.reshaped, r, f"{arr1} @ {arr2} should equal {r}, not {C.reshaped}")
+
+            npC = np.array(arr1) @ np.array(arr2)
+            tst.assert_array_equal(C.reshaped, npC, f"problem in 1 dimensional cases")
+
+        print("arbitrary matrices passed.")
+
+        print("Testing dot with dimensions <= 2")
+        #check <= 2 dimensional dot products
+
+        shape1 = [(3, 4), (1, 5), (9, 10)]
+        shape2 = [(4, 7), (5, 1), (10, 2)]
+
+        for i in range(len(shape1)):
+            npA = np.random.randint(0, 10, size=shape1[i])
+            npB = np.random.randint(0, 10, size=shape2[i])
+
+            npC = npA.dot(npB)
+
+            tensorA = Tensor(npA.tolist())
+            tensorB = Tensor(npB.tolist())
+
+            tensorC = Tensor.dot(tensorA, tensorB)
+
+            #print(f"Actual Shape: {npC.shape} , My shape {tensorC.shape}")
+            tst.assert_array_equal(tensorC.reshaped, npC, f"{tensorC.reshaped} should equal {npC.tolist()}")
+            #self.assertEqual(tensorC.reshaped, npC.T.tolist(), f"{tensorC.reshaped} should equal {npC.tolist()}. ")
+
+        print("Two dimensional cases passed....")
+        #n > 2 dimensional dot product
+        #TODO: RESULT IS TRANSPOSE OF ACTUAL RESULT
+        print("Testing nd matrices...")
+        shape1 = [(1, 2, 4, 4), (2, 2, 4), (3, 3, 2)]
+        shape2 = [(2, 4, 4), (2, 4, 2), (3, 2, 4)]
+
+        for i in range(len(shape1)):
+            npA = np.random.randint(0, 10, size=shape1[i])
+            npB = np.random.randint(0, 10, size=shape2[i])
+
+            npC = npA.dot(npB)
+
+            tensorA = Tensor(npA.tolist())
+            tensorB = Tensor(npB.tolist())
+
+            tensorC = Tensor.dot(tensorA, tensorB)
+
+            print("A: ******", tensorA.reshaped)
+            print("B: ******", tensorB.reshaped)
+            print("np A: ******", npA)
+            print("np B: ******", npB)
+            tst.assert_array_equal(tensorC.reshaped, npC, f"{tensorC.reshaped} should equal {npC.tolist()}")
+
+
+
         print("Tensor dot passed.")
 
     def test_Tensoradd(self):
         print("Testing tensor ADD...")
-        array1 = [[1, 2, 3, 4], [[1, 2], [3, 4]], [5], [[[[1]]]]]
+        array1 = [[1, 2, 3, 4], [[1, 2], [3, 4]], [5], [[[[1]]]], ]
         array2 = [[1, 1, 1, 1], [[1, 0], [0, 1]], [6], [[[[8]]]]]
         results = [[2, 3, 4, 5], [[2, 2], [3, 5]], [11], [[[[9]]]]]
         for a1, a2, r in zip(array1, array2, results):

@@ -57,3 +57,21 @@ def flatten(array):
     if type(array[0]) is list:
         return flatten(array[0]) + flatten(array[1:])
     return [array[0]] + flatten(array[1:])
+
+def increment(indices, ceilings):
+    """Increments the list of indices given by one, starting from the last entry.
+    Ceilings provides the limits of increment"""
+
+    ceilings = ceilings[::-1]
+    temp = list(indices)[::-1]
+    cont = True
+    ind = 0
+    while cont and ind < len(indices):
+        cont = False
+        if temp[ind] + 1 >= ceilings[ind]:
+            cont = True
+            temp[ind] = 0
+        else:
+            temp[ind] += 1
+        ind += 1
+    return temp[::-1]
