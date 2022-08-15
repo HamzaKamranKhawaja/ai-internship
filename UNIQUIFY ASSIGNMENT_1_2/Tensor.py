@@ -184,24 +184,56 @@ class Tensor:
             maxi = math.prod(final_shape)
 
             for i in range(maxi):
-                Acurr = A
-                Bcurr = B
+                #get A row
+                #get A indices upto the last dimension
+                A_indices = indices[:len(Ashape)-1]
+                A_row = A
+                for k in A_indices:
+                    A_row = A_row[k]
+                #get B col as row
+                #get B indices, excluding the last two dimensions
+                B_indices =  indices[-len(Bshape)+1:]
+                print("indices", indices)
+                print("B indices", B_indices)
+                print(B)
+                B_col = B
+                for k in B_indices[:-1]:
+                    B_col = B_col[k]
+                #get B cols as rows
+                B_col = list(zip(*B_col))
+                #get B_row
+                B_col = B_col[indices[-1]]
+                print("B col", B_col)
+                #set the corresponding element in zeros to the dot product
                 curr_entry = zeros
-                for j in indices[:-1]:
-                    curr_entry = curr_entry[j]
-                for k in range(len(Ashape)-1):
-                    Acurr = Acurr[indices[k]]
-                for k in range(-len(Bshape), -2, -1):
-                    Bcurr = Bcurr[indices[k]]
+                for ind in indices[:-1]:
+                    curr_entry = curr_entry[ind]
 
-                Bcurr = list(zip(*Bcurr))
-                Bcurr = Bcurr[indices[-1]]
-                print(Bcurr)
-                print(Acurr)
-                curr_entry[indices[-1]] = sum([i * j for i, j in zip(Acurr, Bcurr)])
+                curr_entry[indices[-1]] = sum([i * j for i, j in zip(A_row, B_col)])
+
                 indices = increment(indices, final_shape)
 
             out_tensor = Tensor(zeros)
+#
+#            for i in range(maxi):
+#                Acurr = A
+#                Bcurr = B
+#                curr_entry = zeros
+#                for j in indices[:-1]:
+#                    curr_entry = curr_entry[j]
+#                for k in range(len(Ashape)-1):
+#                    Acurr = Acurr[indices[k]]
+#                for k in range(-len(Bshape), -2, -1):
+#                    Bcurr = Bcurr[indices[k]]
+#
+#                Bcurr = list(zip(*Bcurr))
+#                Bcurr = Bcurr[indices[-1]]
+#                print(Bcurr)
+#                print(Acurr)
+#                curr_entry[indices[-1]] = sum([i * j for i, j in zip(Acurr, Bcurr)])
+#                indices = increment(indices, final_shape)
+#
+#            out_tensor = Tensor(zeros)
 #            rarray = []
 #            if len(Ashape) > 2:
 #               for i in range(Ashape[0]):

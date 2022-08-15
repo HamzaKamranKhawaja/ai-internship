@@ -134,7 +134,6 @@ class TestTensor(unittest.TestCase):
 
         print("Two dimensional cases passed....")
         #n > 2 dimensional dot product
-        #TODO: RESULT IS TRANSPOSE OF ACTUAL RESULT
         print("Testing nd matrices...")
         shape1 = [(1, 2, 4, 4), (2, 2, 4), (3, 3, 2)]
         shape2 = [(2, 4, 4), (2, 4, 2), (3, 2, 4)]
@@ -144,6 +143,7 @@ class TestTensor(unittest.TestCase):
             npB = np.random.randint(0, 10, size=shape2[i])
 
             npC = npA.dot(npB)
+            print("Desired shape: ", npC.shape)
 
             tensorA = Tensor(npA.tolist())
             tensorB = Tensor(npB.tolist())
